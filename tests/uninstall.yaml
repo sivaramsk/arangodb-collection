@@ -1,0 +1,4 @@
+---                                                                                                                            
+- hosts: agents                                                                                                                
+  roles:                                                                                                                       
+    - ../roles/arangodb_starter_uninstall

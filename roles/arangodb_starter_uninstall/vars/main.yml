@@ -1,0 +1,7 @@
+---
+# vars file for code-server
+arangodb_repository:
+  "3.8.2": "https://download.arangodb.com/arangodb38/Community/Linux/arangodb3-linux-3.8.2.tar.gz"
+  "3.7.15": "https://download.arangodb.com/arangodb37/Community/Linux/arangodb3-linux-3.7.15.tar.gz"
+
+

@@ -1,0 +1,45 @@
+---
+# tasks file for arangodb download and install
+
+- name: Set the arangodb download url based on version
+  set_fact:
+    arangodb_download_url={{ arangodb_repository[arangodb_version] }}
+
+- name: Extract the folder name from download url
+  shell: echo {{ arangodb_download_url | basename }} | sed 's/\.tar\.gz//g'
+  register: arangodb_folder_name
+
+- name: Create the starter_join_ips variable
+  set_fact: 
+    starter_join_ips: |
+      {% for node in arangodb_agents %}{{ node }}:{{ arangodb_starter_port }}{% if not loop.last %},{% endif %}{% endfor %}
+
+- name: Copy systemd file in to /etc/systemd/system
+  ansible.builtin.template:
+    src: "templates/{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
+    mode: '644'
+  become: true
+  loop: "{{ server_type }}"
+  
+- name: Systemd daemon-reload to update the upgraded systemd unit files
+  systemd:
+    daemon_reload: yes
+  become: true
+
+- name: Find the process numbers for the arangodb process
+  shell: "ps -C arangodb -fww | grep arangodb | awk '{print $2}'"   
+  register: result    
+    
+- name: extract only the pids    
+  set_fact:    
+    pids_of_arangodb: "{{ result.stdout }}"    
+    
+- name: Print pids    
+  debug:    
+    msg: "{{ pids_of_arangodb | replace('\n', ' ') }}"   
+
+- name: Kill the arangodb process
+  shell: kill -9 "{{ item }}"
+  with_items: "{{ result.stdout_lines }}"
+  become: true

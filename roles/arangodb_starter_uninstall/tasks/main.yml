@@ -1,0 +1,34 @@
+---
+# tasks file for arangodb download and install
+
+- name: Set the arangodb download url based on version
+  set_fact:
+    arangodb_download_url={{ arangodb_repository[arangodb_version] }}
+
+- name: Stop the Arangodb SystemD units
+  ansible.builtin.systemd:
+    name: "{{ item.service }}"
+    state: stopped
+    daemon_reload: yes
+  loop: 
+    - { service: "agent.service" }
+    - { service: "dbserver.service" }
+    - { service: "coordinator.service" }
+  become: true
+
+- name: Delete the arangodb related folders
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop:
+    - { path: "/var/tmp/arangodb3" }
+    - { path: "/var/run/arangodb3" }
+    - { path: "/var/log/arangodb3" }
+    - { path: "/var/lib/arangodb3" }
+    - { path: "/var/lib/arangodb3-apps" }
+    - { path: "/var/lib/arangodb3-secrets" }
+    - { path: "/etc/arangodb3" }
+    - { path: "/etc/systemd/system/agent.service"}
+    - { path: "/etc/systemd/system/dbserver.service"}
+    - { path: "/etc/systemd/system/coordinator.service"}
+  become: true

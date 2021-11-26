@@ -1,0 +1,59 @@
+---
+# tasks file for arangodb download and install
+  - name: Delete secrets folder if exists
+    ansible.builtin.file:
+      path: secrets
+      state: absent
+    
+  - name: Create secrets folder 
+    ansible.builtin.file:
+      path: secrets
+      state: directory
+
+
+  - name: Set the arangodb download url based on version
+    set_fact:
+      arangodb_download_url={{ arangodb_repository[arangodb_version] }}
+
+  - name: Download and setup Arangodb Server Tar file
+    ansible.builtin.unarchive: 
+      src: "{{ arangodb_download_url }}"
+      dest: /tmp
+      remote_src: yes
+  
+  - name: Extract the folder name from download url
+    shell: echo {{ arangodb_download_url | basename }} | sed 's/\.tar\.gz//g'
+    register: arangodb_folder_name
+
+  - name: Create ArangoDB JWT Secret
+    command: /tmp/"{{ arangodb_folder_name.stdout }}"/bin/arangodb create jwt-secret --secret=arangodb.secret
+    args:
+      chdir: secrets
+
+  - name: Create CA Cert ArangoDB
+    command: /tmp/"{{ arangodb_folder_name.stdout }}"/bin/arangodb create tls ca
+    args:
+      chdir: secrets
+
+  - name: Build tls_key_params variable
+    set_fact: 
+      tls_key_params: |
+        {% for node in arangodb_agents %} 
+          --host {{ node }} 
+        {% endfor %}
+
+      
+  - name: Create SSL Keypair for Arangodb
+    command: /tmp/"{{ arangodb_folder_name.stdout }}"/bin/arangodb create tls keyfile {{ tls_key_params | trim }}
+    args:
+      chdir: secrets
+
+  - name: Set the 644 permission to the files created
+    file: 
+      path: "{{ item.path }}" 
+      mode: '0644'
+    loop:
+      - { path: "secrets/arangodb.secret"}
+      - { path: "secrets/tls-ca.key"}
+      - { path: "secrets/tls-ca.crt"}
+      - { path: "secrets/tls.keyfile"}

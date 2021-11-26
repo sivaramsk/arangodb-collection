@@ -1,0 +1,25 @@
+[Unit]
+Description=Run the ArangoDB Starter
+After=network.target
+ 
+[Service]
+# system limits
+LimitNOFILE=131072
+LimitNPROC=131072
+TasksMax=131072
+User=arangodb
+Group=arangodb
+Restart=on-failure
+KillMode=process
+ExecStart=/usr/local/{{ arangodb_folder_name.stdout }}/bin/arangodb \
+    --starter.address={{ ansible_ssh_host }} \
+    --starter.data-dir=/var/lib/arangodb3/agent \
+    --starter.join={{ starter_join_ips | trim }} \
+    --auth.jwt-secret=/var/lib/arangodb3-secrets/arangodb.secret \
+    --ssl.keyfile=/var/lib/arangodb3-secrets/tls.keyfile \
+    --cluster.start-coordinator=false \
+    --cluster.start-dbserver=false
+TimeoutStopSec=60
+ 
+[Install]
+WantedBy=multi-user.target

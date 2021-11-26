@@ -1,0 +1,27 @@
+---                                                                                                                            
+- hosts: agents                                                                                                                
+  roles:                                                                                                                       
+    - arangodb_cluster
+  serial: 1
+  vars: 
+    install_type: "upgrade"
+    server_type:
+      - agent
+      - dbserver
+      - coordinator
+    
+- hosts: agents[0]
+  roles:
+    - arangodb_common_vars
+  
+  tasks: 
+    - name: Set the arangodb download url based on version
+      set_fact:
+        arangodb_download_url={{ arangodb_repository[arangodb_version] }}
+
+    - name: Extract the folder name from download url
+      shell: echo {{ arangodb_download_url | basename }} | sed 's/\.tar\.gz//g'
+      register: arangodb_folder_name
+     
+    - name: Upgrade the ArangoDB with the starter 
+      shell: "/usr/local/{{ arangodb_folder_name.stdout }}/bin/arangodb upgrade --starter.endpoint=https://{{ ansible_ssh_host }}:{{ arangodb_starter_port }}"

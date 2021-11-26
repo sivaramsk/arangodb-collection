@@ -1,0 +1,64 @@
+---
+# tasks file for arangodb download and install
+- name: Create the arangodb Group
+  group:
+    name: arangodb
+    state: present 
+  become: true
+
+- name: Add arangodb User
+  user:
+    name: arangodb 
+    create_home: no
+    groups: arangodb
+  become: true
+
+- name: Install packages
+  ansible.builtin.package: 
+    pkg: "{{ item.package }}"
+    update_cache: yes
+  become: true
+  loop: 
+    - { package: "gcc" }
+    - { package: "curl" }
+    - { package: "net-tools" }
+
+- name: Set the arangodb download url based on version
+  set_fact:
+    arangodb_download_url={{ arangodb_repository[arangodb_version] }}
+
+- name: Download and Install ArangoDB
+  ansible.builtin.unarchive: 
+    src: "{{ arangodb_download_url }}"
+    dest: /usr/local
+    remote_src: yes
+  become: true
+
+- name: Create required folders for Arangodb 
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: '0755'
+    owner: arangodb
+    group: arangodb
+  loop:
+    - { path: "/var/tmp/arangodb3" }
+    - { path: "/var/run/arangodb3" }
+    - { path: "/var/log/arangodb3" }
+    - { path: "/var/lib/arangodb3" }
+    - { path: "/var/lib/arangodb3-apps" }
+    - { path: "/var/lib/arangodb3-secrets" }
+    - { path: "/etc/arangodb3" }
+  become: true
+
+- name: Copy the secrets to the /var/lib/arangodb3-secrets folder
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+      - { src: "secrets/arangodb.secret", dest: /var/lib/arangodb3-secrets/arangodb.secret}
+      - { src: "secrets/tls-ca.key", dest: /var/lib/arangodb3-secrets/tls-ca.key}
+      - { src: "secrets/tls-ca.crt", dest: /var/lib/arangodb3-secrets/tls-ca.crt}
+      - { src: "secrets/tls.keyfile", dest: /var/lib/arangodb3-secrets/tls.keyfile}
+  become: true

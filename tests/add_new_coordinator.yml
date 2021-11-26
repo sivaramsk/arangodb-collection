@@ -1,0 +1,12 @@
+---
+- hosts: coordinators
+  roles:   
+    - arangodb_starter_install
+
+- hosts: coordinators
+  tasks:
+    - name: Start the coordinator server
+      ansible.builtin.systemd:
+        name: coordinator.service
+        state: started
+      become: true

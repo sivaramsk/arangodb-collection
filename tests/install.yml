@@ -1,0 +1,17 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - arangodb_credentials_setup
+
+- hosts: agents
+  roles:   
+    - arangodb_cluster
+  vars: 
+    install_type: "install"
+    server_type: 
+      - agent
+      - dbserver
+      - coordinator
+
+

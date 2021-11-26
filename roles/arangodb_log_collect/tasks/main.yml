@@ -1,0 +1,32 @@
+---
+# tasks file for arangodb download and install
+
+- name: Delete the temporary folder 
+  file:
+    path: "{{ log_foldername }}"
+    state: absent
+
+- name: Create a temporary folder to collect logs
+  file:
+    path: "{{ log_foldername }}/{{ ansible_ssh_host }}"
+    state: directory
+
+- name: Collect logs for Agent Service
+  shell: journalctl --lines={{ no_of_lines }} -u agent.service > {{ log_foldername }}/{{ ansible_ssh_host }}/agent.service
+
+- name: Collect logs for DBServer Service
+  shell: journalctl --lines={{ no_of_lines }} -u dbserver.service > {{ log_foldername }}/{{ ansible_ssh_host }}/dbserver.service
+  
+- name: Collect logs for Cooridinator Service
+  shell: journalctl --lines={{ no_of_lines }} -u coordinator.service > {{ log_foldername }}/{{ ansible_ssh_host }}/coordinator.service
+  
+- name: Archive the target folder
+  archive: 
+    path: "{{ log_foldername }}/{{ ansible_ssh_host }}"
+    dest: "{{ log_foldername }}/{{ ansible_ssh_host }}.tgz"
+
+- name: Copy the local folder to the ansible controller
+  fetch: 
+    src: "{{ log_foldername }}/{{ ansible_ssh_host }}.tgz"
+    dest: "{{ log_foldername }}/{{ folder_name_timestamp }}/"
+    flat: yes
