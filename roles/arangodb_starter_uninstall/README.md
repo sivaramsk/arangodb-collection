@@ -17,7 +17,7 @@ arangodb_version
 Example Playbook
 ----------------
 
-Refer to the playbook in tests/uninstall.yaml for an example.
+Refer to the playbook in playbooks/uninstall.yaml for an example.
 
 License
 -------
