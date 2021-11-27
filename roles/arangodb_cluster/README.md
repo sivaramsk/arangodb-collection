@@ -68,7 +68,7 @@ This role has dependecy on the role included in this collection
 Example Playbook
 ----------------
 
-Refer to the playbook in tests/install.yml and tests/upgrade.yml for an example.
+Refer to the playbook in playbooks/install.yml and playbooks/upgrade.yml for an example.
 
 License
 -------
