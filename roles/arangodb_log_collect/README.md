@@ -22,7 +22,7 @@ arangodb_common_vars
 Example Playbook
 ----------------
 
-Refer to the playbook in tests/logcollect.yaml for an example.
+Refer to the playbook in playbooks/logcollect.yaml for an example.
 
 License
 -------
