@@ -8,7 +8,7 @@ This collections support the below roles
 
 Each role is documented in its own page inside the roles folder.
 
-Make sure the roles are placed on the roles_path. When checking out in a non_standard roles_path, use the ansible.cfg with roles_path set to the path where roles were downloaded and place the ansible.cfg in the same location as the playbook. Refer to the tests folder for sample.
+Make sure the roles are placed on the roles_path. When checking out in a non_standard roles_path, use the ansible.cfg with roles_path set to the path where roles were downloaded and place the ansible.cfg in the same location as the playbook. Refer to the playbooks folder for sample.
 
 ```
 [defaults]
